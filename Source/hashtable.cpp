@@ -22,7 +22,7 @@ Hashtab_t* Hashtab_Ctor(size_t capacity, int (*hashfunc)(HashData_t)) {
     return hashtab;
 }
 
-HashErr Hashtab_Dtor(Hashtab_t* hashtab) {
+HashErr_t Hashtab_Dtor(Hashtab_t* hashtab) {
     assert(hashtab);
 
     for (size_t tabcell = 0;  tabcell < CAP(hashtab);  tabcell++) {
@@ -35,7 +35,7 @@ HashErr Hashtab_Dtor(Hashtab_t* hashtab) {
     return no_errors;
 }
 
-HashErr Hashtab_Addelem(Hashtab_t* hashtab, HashData_t obj) {
+HashErr_t Hashtab_Addelem(Hashtab_t* hashtab, HashData_t obj) {
     assert(hashtab);
     assert(obj);
 
@@ -48,11 +48,16 @@ HashErr Hashtab_Addelem(Hashtab_t* hashtab, HashData_t obj) {
     return no_errors;
 }
 
-List_t* Hashtab_Getlist(Hashtab_t* hashtab, const HashData_t obj) {
+HashData_t Hashtab_Find(Hashtab_t* hashtab, const HashData_t obj) {
     assert(hashtab);
     assert(obj);
 
     size_t hash = (size_t) FUNC(hashtab)(obj);
+    List_t* list = TAB(hashtab)[hash % CAP(hashtab)];
 
-    return TAB(hashtab)[hash % CAP(hashtab)];
+    HashData_t result = List_Find(list, obj);
+
+    if (result == NULL)  return POISON;
+    
+    return result;
 }

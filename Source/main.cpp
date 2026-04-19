@@ -5,13 +5,16 @@
 #include "mylistlib.h"
 #include "hashtable.h"
 #include "hashfunc.h"
+#include "utils.h"
 
-FILE* Statfile = fopen("Statfile.csv", "w");
+FILE* Statfile = fopen("Files/Statfile.csv", "w");
+FILE* Text     = fopen("Files/Text.txt", "r");
 
 void Garbage_collect(void);
 
 void Garbage_collect(void) {
     fclose(Statfile);
+    fclose(Text);
     free(POISON);
 }
 
@@ -19,16 +22,15 @@ int main()
 {
     atexit(Garbage_collect);
 
-    char* str = strdup("abc");
+    Hashtab_t* hashtab = Hashtab_Ctor(1000, &hf_Checksum);
 
-    Hashtab_t* hashtab = Hashtab_Ctor(1000, &hf_Crc32 );
+    char* text_buf = Read_file2buf(Text);
+    Fill_Hashtable(hashtab, text_buf);
 
-    Hashtab_Addelem(hashtab, str);
-
-    printf("%s\n", DATA(Hashtab_Getlist(hashtab, "abc"))[get_tail(Hashtab_Getlist(hashtab, "abc"))] );
+    printf("%s\n", Hashtab_Find(hashtab, "aardwolf"));
 
     Hashtab_Dtor(hashtab);
-    free(str);
+    free(text_buf);
 
     return 0;
 }

@@ -12,7 +12,7 @@ struct List_t {
 };
 
 extern FILE* Statfile;  // !!! THIS FILE RELATES TO HASHTABLE, BUT I DONT WANT TO CREATE .h FILE FOR ONLY ONE DECLARATION !!! 
-                        // YOU CAN DELETE THIS DECLARATION IF YOU DONT USE STATFILE IN YOUR PROJECT
+extern FILE* Text;      // YOU CAN DELETE THIS DECLARATION IF YOU DONT USE THESE IN YOUR PROJECT
                         
 extern ListData_t POISON;
 
@@ -52,14 +52,14 @@ typedef Errors_and_warnings ListErr_t;
 
 List_t* List_Ctor  (size_t size);
 ListErr_t   List_Dtor  (List_t* list);
-// ListErr_t   List_Verify(List_t* list, size_t idxex, const char* dump_info);
 
 int         List_Insert_after (List_t* list, size_t idx, ListData_t value);
 int         List_Insert_before(List_t* list, size_t idx, ListData_t value);
 int         List_Insert_Head  (List_t* list, ListData_t value);
 int         List_Insert_Tail  (List_t* list, ListData_t value);
 ListErr_t   List_Delete       (List_t* list, size_t idx);
-List_t* List_Realloc      (List_t* list);
+List_t*     List_Realloc      (List_t* list);
+ListData_t  List_Find         (List_t* list, ListData_t value);
 
 size_t      get_head (List_t* list);
 size_t      get_tail (List_t* list);
@@ -74,22 +74,35 @@ int         get_prev (List_t* list, size_t idx);
 #define PREV(list)   (list)->prev
 
 
-
-#define SAFE_CALLOC(name, size_of_buf, el_type)                                     \
-    el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));         \
-                                                                                    \
-    if (temp_##name == NULL)                                                        \
-        fprintf(stderr, "Allocation error of" #name "\n");                          \
-                                                                                    \
+#define SAFE_CALLOC(name, size_of_buf, el_type)                                                             \
+    el_type* temp_##name = (el_type*) calloc(size_of_buf, sizeof(el_type));                                 \
+                                                                                                            \
+    if (temp_##name == NULL)                                                                                \
+        fprintf(stderr, "Allocation error of " #name " in %s (%s:%d)\n", __func__, __FILE__, __LINE__);     \
+                                                                                                            \
     el_type* name = temp_##name;    
     
-#define SAFE_FOPEN(name, file, mode)                                                \
-    FILE* temp_##name = fopen(file, mode);                                          \
-                                                                                    \
-    if (temp_##name == NULL)                                                        \
-        fprintf(stderr, "File opening error (" #name ")\n");                        \
-                                                                                    \
+#define SAFE_FOPEN(name, file, mode)                                                                        \
+    FILE* temp_##name = fopen(file, mode);                                                                  \
+                                                                                                            \
+    if (temp_##name == NULL)                                                                                \
+        fprintf(stderr, "File opening error (" #name ") in %s (%s:%d)\n", __func__, __FILE__, __LINE__);    \
+                                                                                                            \
     FILE* name = temp_##name; 
+
+#define SAFE_FSTAT(describtor, ptr_to_stat_struct)                                                          \
+    int stat_check_##file = fstat(describtor, ptr_to_stat_struct);                                          \
+                                                                                                            \
+    if (stat_check_##file == -1)                                                                            \
+        fprintf(stderr, "File stat error in function %s in %s:%d\n", __func__, __FILE__, __LINE__);         \
+    
+
+#define SAFE_FREAD(buffer, size_of_elem, count_of_elem, file)                                                                               \
+    int fread_check_##file = fread(buffer, size_of_elem, count_of_elem, file);                                                              \
+                                                                                                                                            \
+    if (fread_check_##file < count_of_elem)                                                                                                 \
+        fprintf(stderr, "Warning: error in fread or fread did not read any symbols (%s in %s:%d)\n", __func__, __FILE__, __LINE__);         \
+
 
     ListErr_t List_Dump         (List_t* list, const char* dump_info);
     ListErr_t List_Dump_graphviz(List_t* list, FILE* output_file);

@@ -12,7 +12,7 @@ typedef ListData_t  HashData_t;
 
 const size_t List_Capacity = 16;
 
-enum HashErr {
+enum HashErr_t {
     no_errors = 0
 };
 
@@ -23,9 +23,9 @@ struct Hashtab_t {
 };
 
 Hashtab_t* Hashtab_Ctor   (size_t capacity, int (*hashfunc)(HashData_t));
-HashErr    Hashtab_Dtor   (Hashtab_t* hashtab);
+HashErr_t  Hashtab_Dtor   (Hashtab_t* hashtab);
 
-HashErr    Hashtab_Addelem(Hashtab_t* hashtab, HashData_t obj);
-List_t*    Hashtab_Getlist(Hashtab_t* hashtab, const HashData_t obj);
+HashErr_t  Hashtab_Addelem(Hashtab_t* hashtab, HashData_t obj);
+HashData_t Hashtab_Find(Hashtab_t* hashtab, const HashData_t obj);
 
 #endif
