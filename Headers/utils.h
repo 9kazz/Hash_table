@@ -7,12 +7,12 @@
 #include "mylistlib.h"
 #include "hashtable.h"
 
-HashErr_t Fill_Hashtable(Hashtab_t* hashtab, char* text_buf);
+HashErr_t Fill_Hashtable       (Hashtab_t* hashtab, char** word_buf);
+HashErr_t UnitTest_Hashtab_Find(Hashtab_t* hashtab, char** word_buf);
+
 char*     Read_file2buf (FILE* input_file);
+char**    Create_Wordbuf(char* text_buf);
 int       Collect_Stat  (HashData_t obj, size_t table_idx);
 int       skip_space    (char** str);
-
-int rol(int num, int bits2rol);
-int ror(int num, int bits2rol);
 
 #endif

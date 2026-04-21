@@ -22,15 +22,21 @@ int main()
 {
     atexit(Garbage_collect);
 
-    Hashtab_t* hashtab = Hashtab_Ctor(1000, &hf_Checksum);
+    Hashtab_t* hashtab = Hashtab_Ctor(4000, &hf_Crc32);
 
-    char* text_buf = Read_file2buf(Text);
-    Fill_Hashtable(hashtab, text_buf);
+    char*  text_buf = Read_file2buf(Text);
+    char** word_buf = Create_Wordbuf(text_buf);
 
-    printf("%s\n", Hashtab_Find(hashtab, "aardwolf"));
+    Fill_Hashtable(hashtab, word_buf);
+
+    for (int cnt = 0; cnt < 100; cnt++)
+        UnitTest_Hashtab_Find(hashtab, word_buf); // try to find 120k words
 
     Hashtab_Dtor(hashtab);
     free(text_buf);
+    free(word_buf);
+
+    // system("/usr/bin/python /home/gkazz/prog/hashtable/Hash_table/MakeHist.py");
 
     return 0;
 }

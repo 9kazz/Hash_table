@@ -41,40 +41,27 @@ int hf_Checksum(HashData_t obj) {
 int hf_Rol(HashData_t obj) {
     assert(obj);
 
-    int  result   = 0;
-    char cur_char = obj[0];
-    
-    for (size_t char_cnt = 0; cur_char != '\0'; char_cnt++)
+    unsigned int result = 0;
+
+    for (char* cur_char = obj;  *cur_char != '\0';  cur_char++)
     {
-        cur_char = obj[char_cnt];
-        result = rol(result, 1);
-        result |= cur_char;
+        result = (result << 1) | (result >> 31); // rol
+        result ^= *cur_char;
     }
 
-    return result;
+    return (int) result;
 }
 
 int hf_Crc32(HashData_t obj) {
     assert(obj);
 
+    #include "crc_table.h"
+    
     size_t obj_len = strlen(obj);
 
     const int polynom = 0xEDB88320;
 
-    int crc_table[256] = {0};
-    int crc = 1;
-
-    for (size_t byte_cnt = 0; byte_cnt < 256; byte_cnt++)
-    {
-        crc = 1;
-
-        for (size_t bit_cnt = 0; bit_cnt < 8; bit_cnt++)
-            crc = (crc & 1) ?  (crc >> 1) ^ polynom  :  crc >> 1;
-        
-        crc_table[byte_cnt] = crc;
-    }
-
-    crc = 0xFFFFFFFF;
+    int crc = 0xFFFFFFFF;
 
     for (size_t obj_byte = 0; obj_byte < obj_len; obj_byte++)
         crc = crc_table[ (crc ^ obj[obj_byte]) & 0xFF ] ^ (crc >> 8);

@@ -39,11 +39,14 @@ HashErr_t Hashtab_Addelem(Hashtab_t* hashtab, HashData_t obj) {
     assert(hashtab);
     assert(obj);
 
-    size_t hash      = (size_t) FUNC(hashtab)(obj);
-    size_t table_idx = hash % CAP(hashtab);
-    
-    List_Insert_Tail(TAB(hashtab)[table_idx],  obj);
-    Collect_Stat(obj, table_idx);
+    size_t  hash      = (size_t) FUNC(hashtab)(obj);
+    size_t  table_idx = hash % CAP(hashtab);
+    List_t* list      = TAB(hashtab)[table_idx];
+
+    if (List_Find(list, obj) != POISON) {
+        List_Insert_Tail(list,  obj);   
+        // Collect_Stat(obj, table_idx);
+    }
 
     return no_errors;
 }

@@ -10,15 +10,49 @@
 #include "hashtable.h"
 #include "utils.h"
 
-HashErr_t Fill_Hashtable(Hashtab_t* hashtab, char* text_buf) {
+HashErr_t Fill_Hashtable(Hashtab_t* hashtab, char** word_buf) {
     assert(hashtab);
+    assert(word_buf);
+
+    char* word_ptr = word_buf[0];
+
+    for (size_t word_cnt = 0;  (word_ptr = word_buf[word_cnt]) != NULL;  word_cnt++) 
+        Hashtab_Addelem(hashtab, word_ptr);
+
+    return no_errors;
+}
+
+HashErr_t UnitTest_Hashtab_Find(Hashtab_t* hashtab, char** word_buf) {
+    assert(hashtab);
+    assert(word_buf);
+
+    char* word_ptr = word_buf[0];
+    
+    for (size_t word_cnt = 0;  (word_ptr = word_buf[word_cnt]) != NULL;  word_cnt++) 
+        Hashtab_Find(hashtab, word_ptr);
+
+    return no_errors;
+}
+
+char** Create_Wordbuf(char* text_buf) {
     assert(text_buf);
 
-    char* word_start = text_buf;
-    char* next_char  = text_buf;
+    size_t start_bufsize = 50000;
 
-    while (*next_char != '$') 
+    char** word_buf   = (char**) calloc(start_bufsize, sizeof(word_buf[0]));
+    char*  word_start = text_buf;
+    char*  next_char  = text_buf;
+
+    size_t word_cnt = 0;
+
+    for (word_cnt = 0;  *next_char != '$';  word_cnt++) 
     {
+        if (word_cnt >= start_bufsize - 1) 
+        {
+            start_bufsize *= 2;                    
+            word_buf = (char**) realloc(word_buf, start_bufsize * sizeof(word_buf[0]));
+        }
+
         word_start = next_char;
 
         while ( ! isspace(*next_char) )
@@ -28,10 +62,12 @@ HashErr_t Fill_Hashtable(Hashtab_t* hashtab, char* text_buf) {
         next_char++ ;
         skip_space(&next_char);
         
-        Hashtab_Addelem(hashtab, word_start);
+        word_buf[word_cnt] = word_start;
     }
 
-    return no_errors;
+        word_buf[word_cnt] = NULL;
+
+    return word_buf;
 }
 
 char* Read_file2buf(FILE* input_file) {
@@ -58,38 +94,7 @@ char* Read_file2buf(FILE* input_file) {
 int Collect_Stat(HashData_t obj, size_t table_idx) {
     assert(obj);
     return fprintf(Statfile, "%s\t%d\n", obj, table_idx);
-}
-
-int rol(int num, int bits2rol) 
-{
-    int result = num;
-
-    if (bits2rol == 0) {
-
-    } else if (bits2rol < 0) {
-        result = ror(num, -bits2rol);
-
-    } else {
-        result = (num << bits2rol) | (num >> (sizeof(num) * 8 - bits2rol));
-    }
-
-    return result;       
-}
-
-int ror(int num, int bits2rol) 
-{
-    int result = num;
-
-    if (bits2rol == 0) {
-
-    } else if (bits2rol < 0) {
-        result = rol(num, -bits2rol);
-
-    } else {
-        result = (num >> bits2rol) | (num << (sizeof(num) * 8 - bits2rol));
-    }
-
-    return result;       
+    // return fprintf(Statfile, "%d\n", table_idx);
 }
 
 int skip_space(char** str) {
