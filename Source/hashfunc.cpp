@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <nmmintrin.h>
 
 #include "mylistlib.h"
 #include "hashtable.h"
@@ -55,16 +56,11 @@ int hf_Rol(HashData_t obj) {
 int hf_Crc32(HashData_t obj) {
     assert(obj);
 
-    #include "crc_table.h"
-    
     size_t obj_len = strlen(obj);
-
-    const int polynom = 0xEDB88320;
-
-    int crc = 0xFFFFFFFF;
+    unsigned int crc = 0xFFFFFFFF;
 
     for (size_t obj_byte = 0; obj_byte < obj_len; obj_byte++)
-        crc = crc_table[ (crc ^ obj[obj_byte]) & 0xFF ] ^ (crc >> 8);
+        crc = _mm_crc32_u8(crc, obj[obj_byte]);
 
     return ~crc;
 }
